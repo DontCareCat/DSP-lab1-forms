@@ -107,15 +107,15 @@ namespace DSP_lab1_forms
             int ymax = int.MinValue;
             int ymin = int.MaxValue;
 
-            for(int i = 0;i<source.subchunk2Size;i++)
+            for(int i = 0;i<source.sampleCount;i++)
             {
-                if (source.buffer[i + source.dataAddress + 8] > ymax)
-                    ymax = source.buffer[i + source.dataAddress + 8];
-                if(source.buffer[i+source.dataAddress+8]<ymin)
-                    ymin= source.buffer[i + source.dataAddress + 8];
+                if (source[i].Item3 > ymax)
+                    ymax = source[i].Item3;
+                if(source[i].Item3 < ymin)
+                    ymin= source[i].Item3;
             }
 
-            double xscale = ((double)source.subchunk2Size) / pictureBox1.Width;
+            double xscale = ((double)source.sampleCount) / pictureBox1.Width;
             double yscale = ((double)(ymax - ymin)) / pictureBox1.Height;
 
             for(int i=0;i<source.sampleCount;i++)
