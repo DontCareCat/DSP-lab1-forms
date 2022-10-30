@@ -23,6 +23,7 @@ namespace DSP_lab1_forms
 
         private void button1_Click(object sender, EventArgs e)
         {
+            Console.Clear();
             string path = "";
             using(OpenFileDialog openFileDialog= new OpenFileDialog())
             {
@@ -116,9 +117,9 @@ namespace DSP_lab1_forms
             }
 
             double xscale = ((double)source.sampleCount) / pictureBox1.Width;
-            double yscale = ((double)(ymax - ymin)) / pictureBox1.Height;
+            double yscale = ((double)(ymax - ymin)) / pictureBox1.Height*2;
 
-            for(int i=0;i<source.sampleCount;i++)
+            for (int i=0;i<source.sampleCount;i++)
             {
                 (byte, int, int) sample = source[i];
                 Point p = new Point((int)(i/xscale),(int)(sample.Item3/yscale));
@@ -128,35 +129,37 @@ namespace DSP_lab1_forms
                         tempPointsR.Add(p);
                     if(tempPointsR.Count!=0&&tempPointsR[tempPointsR.Count-1].X!=p.X)
                     {
-
+                        int sumY = 0;
+                        for (int j = 0; j < tempPointsR.Count; j++)
+                        {
+                            sumY += tempPointsR[j].Y;
+                        }
+                        pointsR.Add(new Point((int)(i / xscale) - 1, sumY / tempPointsR.Count + pictureBox1.Height / 2));
+                        tempPointsR.Clear();
                     }
                 }
                 if(sample.Item1==1)
                 {
-
+                    if (tempPointsL.Count == 0 || tempPointsL[tempPointsL.Count - 1].X == p.X)
+                        tempPointsL.Add(p);
+                    if (tempPointsL.Count != 0 && tempPointsL[tempPointsL.Count - 1].X != p.X)
+                    {
+                        int sumY = 0;
+                        for (int j = 0; j < tempPointsL.Count; j++)
+                        {
+                            sumY += tempPointsL[j].Y;
+                        }
+                        pointsL.Add(new Point((int)(i / xscale) - 1, sumY / tempPointsL.Count+pictureBox1.Height/2));
+                        tempPointsL.Clear();
+                    }
                 }
             }
 
-            /*for(int i=0;i<source.subchunk2Size;i++)
-            {
-                Point p = new Point((int)(i / xscale), (int)(source.buffer[i + source.dataAddress + 8] / yscale));
-                if(tempPointsR.Count==0||tempPointsR[tempPointsR.Count-1].X==p.X)
-                {
-                    tempPointsR.Add(p);
-                }
-                if(tempPointsR.Count != 0 && tempPointsR[tempPointsR.Count - 1].X != p.X)
-                {
-                    int sumY = 0;
-                    for(int j=0;j<tempPointsR.Count;j++)
-                    {
-                        sumY += tempPointsR[j].Y;
-                    }
-                    pointsR.Add(new Point((int)(i / xscale)-1, sumY / tempPointsR.Count));
-                    tempPointsR.Clear();
-                }
-            }*/
+            
             graphics.DrawLines(penR, pointsR.ToArray());
             graphics.DrawLines(penL, pointsL.ToArray());
+            Console.WriteLine($"ymin:{ymin}\t ymax:{ymax}\tresolution:{pictureBox1.Width}x{pictureBox1.Height}\txscale:{xscale}\tyscale:{yscale}");
+            
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -286,7 +289,13 @@ namespace DSP_lab1_forms
                     int sample = 0;
                     int block = i / blockAlign;
                     channel = (byte)(block % 2);
-                    sample = Convert.ToInt32(buffer.Skip(i * bitsPerSample / 8 + dataAddress+8).Take(bitsPerSample / 8));
+                    //sample = BitConverter.ToInt32(buffer.Skip(i * bitsPerSample / 8 + dataAddress+8).Take(bitsPerSample / 8).ToArray());
+                    var s = buffer.Skip(i * bitsPerSample / 8 + dataAddress + 8).Take(bitsPerSample / 8).ToList();
+                    for(int j=s.Count();j<4;j++)
+                    {
+                        s.Insert(0, 0);
+                    }
+                    sample = BitConverter.ToInt32(s.ToArray());
                     return (channel,block,sample);
                 }
             }
