@@ -120,7 +120,21 @@ namespace DSP_lab1_forms
 
             for(int i=0;i<source.sampleCount;i++)
             {
-                //Point p = new
+                (byte, int, int) sample = source[i];
+                Point p = new Point((int)(i/xscale),(int)(sample.Item3/yscale));
+                if(sample.Item1==0)
+                {
+                    if (tempPointsR.Count == 0 || tempPointsR[tempPointsR.Count - 1].X == p.X)
+                        tempPointsR.Add(p);
+                    if(tempPointsR.Count!=0&&tempPointsR[tempPointsR.Count-1].X!=p.X)
+                    {
+
+                    }
+                }
+                if(sample.Item1==1)
+                {
+
+                }
             }
 
             /*for(int i=0;i<source.subchunk2Size;i++)
