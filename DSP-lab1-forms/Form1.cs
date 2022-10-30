@@ -118,7 +118,12 @@ namespace DSP_lab1_forms
             double xscale = ((double)source.subchunk2Size) / pictureBox1.Width;
             double yscale = ((double)(ymax - ymin)) / pictureBox1.Height;
 
-            for(int i=0;i<source.subchunk2Size;i++)
+            for(int i=0;i<source.sampleCount;i++)
+            {
+                //Point p = new
+            }
+
+            /*for(int i=0;i<source.subchunk2Size;i++)
             {
                 Point p = new Point((int)(i / xscale), (int)(source.buffer[i + source.dataAddress + 8] / yscale));
                 if(tempPointsR.Count==0||tempPointsR[tempPointsR.Count-1].X==p.X)
@@ -135,8 +140,9 @@ namespace DSP_lab1_forms
                     pointsR.Add(new Point((int)(i / xscale)-1, sumY / tempPointsR.Count));
                     tempPointsR.Clear();
                 }
-            }
+            }*/
             graphics.DrawLines(penR, pointsR.ToArray());
+            graphics.DrawLines(penL, pointsL.ToArray());
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -248,33 +254,29 @@ namespace DSP_lab1_forms
                     return BitConverter.ToInt32(buffer, dataAddress+4);
                 }
             }
-            public int rightChannelSampleCount
+            public int sampleCount
             {
-                get {
-                    int count = 0;
-                    if(numChannels==1)
-                    {
-                        int i = 0;
-                        
-                    }
-                    if(numChannels==2)
-                    {
-
-                    }
-                    return count;
-                }
-            }
-            public int leftChannelSampleCount
-            {
-                get{
-                    int count = 0;
-                    return count;
+                get
+                {
+                    return (buffer.Length - dataAddress - 8) / (bitsPerSample / 8);
                 }
             }
 
             #endregion metadata
 
-            
+            public (byte,int,int) this[int i]
+            {
+                get
+                {
+                    byte channel = 0; // 0 or 1 for right and left channels
+                    int sample = 0;
+                    int block = i / blockAlign;
+                    channel = (byte)(block % 2);
+                    sample = Convert.ToInt32(buffer.Skip(i * bitsPerSample / 8 + dataAddress+8).Take(bitsPerSample / 8));
+                    return (channel,block,sample);
+                }
+            }
+
 
             public WAVFile(string sourcePath)
             {
